@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sports Advocacy – Petition</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0073ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #005ed1;
+        }
+
+        .signature-box {
+            padding: 10px;
+            margin: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Support Higher Subsidy for National Athletes</h1>
+
+    <p>Sign the petition to support better funding, training, and financial assistance for national athletes.</p>
+
+    <h2>Sign the Petition</h2>
+    <input id="name" type="text" placeholder="Your Name">
+    <textarea id="message" placeholder="Your Message (optional)"></textarea>
+    <button onclick="submitSignature()">Sign</button>
+
+    <h2>Signatures</h2>
+    <div id="signatureList"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+    // ===============================
+    // Replace THIS with your Firebase config
+    // ===============================
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3J7geS0o25DDwUFtMaMvcc48lsXk6Ifs",
+      authDomain: "etech-sports-advocacy.firebaseapp.com",
+      projectId: "etech-sports-advocacy",
+      storageBucket: "etech-sports-advocacy.firebasestorage.app",
+      messagingSenderId: "277339270176",
+      appId: "1:277339270176:web:06fca506d41a54794ea045",
+      measurementId: "G-CLY9C9YH6C"
+    };
+
+    // Import Firebase modules (ES Modules)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } 
+        from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // Initialize the app
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Add signature
+    async function submitSignature() {
+        const name = document.getElementById("name").value.trim();
+        const message = document.getElementById("message").value.trim();
+
+        if (!name) {
+            alert("Name is required.");
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "signatures"), {
+                name,
+                message,
+                timestamp: serverTimestamp()
+            });
+
+            document.getElementById("name").value = "";
+            document.getElementById("message").value = "";
+        } catch (e) {
+            console.error("Error adding signature:", e);
+            alert("Failed to submit. Check console.");
+        }
+    }
+
+    // Real-time listener
+    const q = query(collection(db, "signatures"), orderBy("timestamp", "desc"));
+    onSnapshot(q, snapshot => {
+        const list = document.getElementById("signatureList");
+        list.innerHTML = "";
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.className = "signature-box";
+
+            div.innerHTML = `
+                <strong>${data.name}</strong><br>
+                ${data.message ? data.message : ""}
+            `;
+
+            list.appendChild(div);
+        });
+    });
+</script>
+
+</body>
+</html>
