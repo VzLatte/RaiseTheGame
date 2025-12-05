@@ -70,73 +70,70 @@
 
 <!-- Firebase SDK -->
 <script type="module">
-    // ===============================
-    // Replace THIS with your Firebase config
-    // ===============================
-    const firebaseConfig = {
-      apiKey: "AIzaSyC3J7geS0o25DDwUFtMaMvcc48lsXk6Ifs",
-      authDomain: "etech-sports-advocacy.firebaseapp.com",
-      projectId: "etech-sports-advocacy",
-      storageBucket: "etech-sports-advocacy.appspot.com",
-      messagingSenderId: "277339270176",
-      appId: "1:277339270176:web:06fca506d41a54794ea045",
-      measurementId: "G-CLY9C9YH6C"
-    };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // Import Firebase modules (ES Modules)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } 
-        from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyC3J7geS0o25DDwUFtMaMvcc48lsXk6Ifs",
+  authDomain: "etech-sports-advocacy.firebaseapp.com",
+  projectId: "etech-sports-advocacy",
+  storageBucket: "etech-sports-advocacy.appspot.com",
+  messagingSenderId: "277339270176",
+  appId: "1:277339270176:web:06fca506d41a54794ea045",
+  measurementId: "G-CLY9C9YH6C"
+};
 
-    // Initialize the app
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    // Add signature
-    async function submitSignature() {
-        const name = document.getElementById("name").value.trim();
-        const message = document.getElementById("message").value.trim();
+async function submitSignature() {
+  const name = document.getElementById("name").value.trim();
+  const message = document.getElementById("message").value.trim();
 
-        if (!name) {
-            alert("Name is required.");
-            return;
-        }
+  if (!name) {
+    alert("Name is required.");
+    return;
+  }
 
-        try {
-            await addDoc(collection(db, "signatures"), {
-                name,
-                message,
-                timestamp: serverTimestamp()
-            });
+  await addDoc(collection(db, "signatures"), {
+    name,
+    message,
+    timestamp: serverTimestamp()
+  });
 
-            document.getElementById("name").value = "";
-            document.getElementById("message").value = "";
-        } catch (e) {
-            console.error("Error adding signature:", e);
-            alert("Failed to submit. Check console.");
-        }
-    }
+  document.getElementById("name").value = "";
+  document.getElementById("message").value = "";
+}
 
-    // Real-time listener
-    const q = query(collection(db, "signatures"), orderBy("timestamp", "desc"));
-    onSnapshot(q, snapshot => {
-        const list = document.getElementById("signatureList");
-        list.innerHTML = "";
+window.submitSignature = submitSignature;
 
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.className = "signature-box";
+const q = query(collection(db, "signatures"), orderBy("timestamp", "desc"));
 
-            div.innerHTML = `
-                <strong>${data.name}</strong><br>
-                ${data.message ? data.message : ""}
-            `;
+onSnapshot(q, snapshot => {
+  const list = document.getElementById("signatureList");
+  list.innerHTML = "";
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const div = document.createElement("div");
+    div.className = "signature-box";
 
-            list.appendChild(div);
-        });
-    });
+    div.innerHTML = `
+      <strong>${data.name}</strong><br>
+      ${data.message || ""}
+    `;
+    list.appendChild(div);
+  });
+});
 </script>
+
 
 </body>
 </html>
