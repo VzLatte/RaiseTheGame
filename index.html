@@ -62,78 +62,85 @@
     <h2>Sign the Petition</h2>
     <input id="name" type="text" placeholder="Your Name">
     <textarea id="message" placeholder="Your Message (optional)"></textarea>
-    <button onclick="submitSignature()">Sign</button>
+    
+    <button **id="signButton"**>Sign</button> 
 
     <h2>Signatures</h2>
     <div id="signatureList"></div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  orderBy,
-  onSnapshot
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp,
+    query,
+    orderBy,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC3J7geS0o25DDwUFtMaMvcc48lsXk6Ifs",
-  authDomain: "etech-sports-advocacy.firebaseapp.com",
-  projectId: "etech-sports-advocacy",
-  storageBucket: "etech-sports-advocacy.appspot.com",
-  messagingSenderId: "277339270176",
-  appId: "1:277339270176:web:06fca506d41a54794ea045",
-  measurementId: "G-CLY9C9YH6C"
+    // ⚠️ CRITICAL WARNING: This key is publicly visible. Review security rules immediately.
+    apiKey: "AIzaSyC3J7geS0o25DDwUFtMaMvcc48lsXk6Ifs",
+    authDomain: "etech-sports-advocacy.firebaseapp.com",
+    projectId: "etech-sports-advocacy",
+    storageBucket: "etech-sports-advocacy.appspot.com",
+    messagingSenderId: "277339270176",
+    appId: "1:277339270176:web:06fca506d41a54794ea045",
+    measurementId: "G-CLY9C9YH6C"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function submitSignature() {
-  const name = document.getElementById("name").value.trim();
-  const message = document.getElementById("message").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const message = document.getElementById("message").value.trim();
 
-  if (!name) {
-    alert("Name is required.");
-    return;
-  }
+    if (!name) {
+        alert("Name is required.");
+        return;
+    }
 
-  await addDoc(collection(db, "signatures"), {
-    name,
-    message,
-    timestamp: serverTimestamp()
-  });
+    await addDoc(collection(db, "signatures"), {
+        name,
+        message,
+        timestamp: serverTimestamp()
+    });
 
-  document.getElementById("name").value = "";
-  document.getElementById("message").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("message").value = "";
 }
 
-window.submitSignature = submitSignature;
+// -------------------------------------------------------------
+// FIX IMPLEMENTATION: Attach listener inside the module scope
+// -------------------------------------------------------------
+const signButton = document.getElementById("signButton");
+signButton.addEventListener('click', submitSignature);
+// -------------------------------------------------------------
 
 const q = query(collection(db, "signatures"), orderBy("timestamp", "desc"));
 
 onSnapshot(q, snapshot => {
-  const list = document.getElementById("signatureList");
-  list.innerHTML = "";
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "signature-box";
+    const list = document.getElementById("signatureList");
+    list.innerHTML = "";
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "signature-box";
 
-    div.innerHTML = `
-      <strong>${data.name}</strong><br>
-      ${data.message || ""}
-    `;
-    list.appendChild(div);
-  });
+        // Optional: Format the timestamp if needed. Not included here for brevity.
+        
+        div.innerHTML = `
+            <strong>${data.name}</strong><br>
+            ${data.message || ""}
+        `;
+        list.appendChild(div);
+    });
 });
 </script>
-
 
 </body>
 </html>
